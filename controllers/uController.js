@@ -64,7 +64,7 @@ const uController = async (req, res) => {
     user.password = undefined;
     if (!user) {
       return res.status(200).send({
-        message: "Nie znaleziono użytkownikaaaaaaaaaaaaaaaaaaaaaaa",
+        message: "Nie znaleziono użytkownikaaaaaaa",
         success: false,
       });
     } else {
