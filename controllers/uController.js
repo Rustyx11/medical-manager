@@ -65,7 +65,7 @@ const uController = async (req, res) => {
     user.password = undefined;
     if (!user) {
       return res.status(200).send({
-        message: "Nie znaleziono użytkownikaaaaaaa",
+        message: "Nie znaleziono użytkownika",
         success: false,
       });
     } else {
@@ -116,9 +116,36 @@ const adController = async (req, res) => {
   }
 };
 
+//Powiadomienia
+
+const notification = async (req, res) => {
+  try {
+    const user = await userModel.findOne({ _id: req.body.Iduser });
+    const shownotification = user.shownotification;
+    const notification = user.notification;
+    shownotification.push(...notification);
+    user.notification = [];
+    user.shownotification = notification;
+    const updateUser = await user.save();
+    res.status(200).send({
+      success: true,
+      message: "Wszystkie powiadomenia zostały odczytane",
+      data: updateUser,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Wysąpił błąd w powiadomieniach",
+      success: false,
+      error,
+    });
+  }
+};
+
 module.exports = {
   loginController,
   registerController,
   uController,
   adController,
+  notification,
 };
