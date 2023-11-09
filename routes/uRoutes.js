@@ -3,6 +3,7 @@ const {
   loginController,
   registerController,
   uController,
+  adController,
 } = require("../controllers/uController");
 const uAuthorization = require("../middlewares/uAuthorization");
 
@@ -18,4 +19,8 @@ router.post("/register", registerController);
 
 //Authorization || POST
 router.post("/getUData", uAuthorization, uController);
+
+//Dodawanie Doktora || POST
+router.post("/add-doctor", uAuthorization, adController);
+
 module.exports = router;

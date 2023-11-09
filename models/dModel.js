@@ -29,6 +29,10 @@ const doctorSchema = new mongoose.Schema(
       type: String,
       require: [true, "Specjalizacja lekarza jest wymagana."],
     },
+    Status: {
+      type: String,
+      default: "pending",
+    },
     Time: {
       type: Object,
       require: [true, "Czas pracy lekarza."],
@@ -37,5 +41,5 @@ const doctorSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const doctorModel = mongoose.model("users", doctorSchema);
+const doctorModel = mongoose.model("doctors", doctorSchema);
 module.exports = doctorModel;

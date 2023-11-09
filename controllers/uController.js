@@ -2,6 +2,7 @@ const uModel = require("../models/uModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/uModel");
+const doctorModel = require("../models/dModel");
 
 //proces rejestracji
 const registerController = async (req, res) => {
@@ -83,4 +84,41 @@ const uController = async (req, res) => {
   }
 };
 
-module.exports = { loginController, registerController, uController };
+//Proces dodawania doktorów
+
+const adController = async (req, res) => {
+  try {
+    const newDoctor = await doctorModel({ ...req.body, status: "pending" });
+    await newDoctor.save();
+    const adminUser = await userModel.findOne({ admin: true });
+    const notification = adminUser.notification;
+    notification.push({
+      type: "add-doctor-request",
+      message: `${newDoctor.Name} ${newDoctor.LastName} został dodany jako doktor`,
+      data: {
+        doctorID: newDoctor._id,
+        name: newDoctor.Name + " " + newDoctor.LastName,
+        onClickPath: "/admin/doctors",
+      },
+    });
+    await userModel.findByIdAndUpdate(adminUser._id, { notification });
+    res.status(201).send({
+      success: true,
+      message: "Doktor został dodany poprawnie",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      error,
+      message: "Błąd podczas dodawania doktora",
+    });
+  }
+};
+
+module.exports = {
+  loginController,
+  registerController,
+  uController,
+  adController,
+};
