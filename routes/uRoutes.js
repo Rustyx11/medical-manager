@@ -4,7 +4,9 @@ const {
   registerController,
   uController,
   adController,
-  notification,
+  getnotification,
+  deletenotification,
+  getAllDoctorsController,
 } = require("../controllers/uController");
 const uAuthorization = require("../middlewares/uAuthorization");
 
@@ -25,6 +27,12 @@ router.post("/getUData", uAuthorization, uController);
 router.post("/add-doctor", uAuthorization, adController);
 
 //Powiadomienia Doktora || POST
-router.post("/notification", uAuthorization, notification);
+router.post("/notification", uAuthorization, getnotification);
+
+//Powiadomienia Doktora || POST
+router.post("/delete-notification", uAuthorization, deletenotification);
+
+//GET Wszyscy doktorzy
+router.get("/getAllDoctors", uAuthorization, getAllDoctorsController);
 
 module.exports = router;

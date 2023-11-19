@@ -118,7 +118,7 @@ const adController = async (req, res) => {
 
 //Powiadomienia
 
-const notification = async (req, res) => {
+const getnotification = async (req, res) => {
   try {
     const user = await userModel.findOne({ _id: req.body.Iduser });
     const shownotification = user.shownotification;
@@ -142,10 +142,53 @@ const notification = async (req, res) => {
   }
 };
 
+//Usuwanie Powiadomień
+const deletenotification = async (req, res) => {
+  try {
+    const user = await userModel.findOne({ _id: req.body.Iduser });
+    user.notification = [];
+    user.shownotification = [];
+    const updateUser = await user.save();
+    updateUser.password = undefined;
+    res.status(200).send({
+      success: true,
+      message: "Powiadomenia zostały pomyślnie usunięte",
+      data: updateUser,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Wystąpił błąd podczas usuwania powiadomień",
+      error,
+    });
+  }
+};
+
+const getAllDoctorsController = async (req, res) => {
+  try {
+    const doctors = await doctorModel.find({ status: "pending" });
+    res.status(200).send({
+      success: true,
+      message: "Lista doktorów pomyślnie załadowana",
+      data: doctors,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      error,
+      message: "Błąd w pobieraniu listy doktorów",
+    });
+  }
+};
+
 module.exports = {
   loginController,
   registerController,
   uController,
   adController,
-  notification,
+  getnotification,
+  deletenotification,
+  getAllDoctorsController,
 };

@@ -29,7 +29,7 @@ const doctorSchema = new mongoose.Schema(
       type: String,
       require: [true, "Specjalizacja lekarza jest wymagana."],
     },
-    Status: {
+    status: {
       type: String,
       default: "pending",
     },
