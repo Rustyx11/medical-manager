@@ -7,6 +7,7 @@ const {
   getnotification,
   deletenotification,
   getAllDoctorsController,
+  reservationController,
 } = require("../controllers/uController");
 const uAuthorization = require("../middlewares/uAuthorization");
 
@@ -34,5 +35,8 @@ router.post("/delete-notification", uAuthorization, deletenotification);
 
 //GET Wszyscy doktorzy
 router.get("/getAllDoctors", uAuthorization, getAllDoctorsController);
+
+//Rezerwowanie Wizyty
+router.post("/reservation", uAuthorization, reservationController);
 
 module.exports = router;

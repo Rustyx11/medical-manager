@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/uModel");
 const doctorModel = require("../models/dModel");
+const appointmentModel = require("../models/aModel");
 
 //proces rejestracji
 const registerController = async (req, res) => {
@@ -183,6 +184,32 @@ const getAllDoctorsController = async (req, res) => {
   }
 };
 
+const reservationController = async (req, res) => {
+  try {
+    req.body.status = "pending";
+    const newAppointment = new appointmentModel(req.body);
+    await newAppointment.save();
+    const user = await userModel.findOne({ _id: req.body.doctorInfo.Iduser });
+    user.notification.push({
+      type: "New-reservation",
+      message: `Nowe zgłoszenie rezerwacji od ${req.body.userInfo.name}`,
+      onClickPath: "/user/appointments",
+    });
+    await user.save();
+    res.status(200).send({
+      success: true,
+      message: "Pomyślnie zgłoszono wizytę",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      error,
+      message: "Błąd przy rezezerwowaniu wizyty",
+    });
+  }
+};
+
 module.exports = {
   loginController,
   registerController,
@@ -191,4 +218,5 @@ module.exports = {
   getnotification,
   deletenotification,
   getAllDoctorsController,
+  reservationController,
 };
