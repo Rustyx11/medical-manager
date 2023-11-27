@@ -8,6 +8,8 @@ const {
   deletenotification,
   getAllDoctorsController,
   reservationController,
+  checkReservationController,
+  userVisitController,
 } = require("../controllers/uController");
 const uAuthorization = require("../middlewares/uAuthorization");
 
@@ -38,5 +40,11 @@ router.get("/getAllDoctors", uAuthorization, getAllDoctorsController);
 
 //Rezerwowanie Wizyty
 router.post("/reservation", uAuthorization, reservationController);
+
+//Sprawdzanie rezerwacji
+router.post("/check-reservation", uAuthorization, checkReservationController);
+
+//Lista Wizyt
+router.get("/user-visit", uAuthorization, userVisitController);
 
 module.exports = router;

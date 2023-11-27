@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const userModel = require("../models/uModel");
 const doctorModel = require("../models/dModel");
 const appointmentModel = require("../models/aModel");
+const moment = require("moment");
 
 //proces rejestracji
 const registerController = async (req, res) => {
@@ -186,6 +187,8 @@ const getAllDoctorsController = async (req, res) => {
 
 const reservationController = async (req, res) => {
   try {
+    req.body.date = moment(req.body.date, "DD-MM-YYYY").toISOString();
+    req.body.date = moment(req.body.time, "HH:mm").toISOString();
     req.body.status = "pending";
     const newAppointment = new appointmentModel(req.body);
     await newAppointment.save();
@@ -210,6 +213,61 @@ const reservationController = async (req, res) => {
   }
 };
 
+const checkReservationController = async (req, res) => {
+  try {
+    const date = moment(req.body.date, "DD-MM-YYYY").toISOString();
+    const atTime = moment(req.body.time, "HH:mm")
+      .subtract(1, "hours")
+      .toISOString();
+    const toTime = moment(req.body.time, "HH:mm").add(1, "hours").toISOString();
+    const doctorId = req.body.doctorId;
+    const appointments = await appointmentModel.find({
+      doctorId,
+      date,
+      time: {
+        $gte: atTime,
+        $lte: toTime,
+      },
+    });
+    if (appointments.length > 0) {
+      return res.status(200).send({
+        message: "Wizyta nie dostępna w tym zakresie czasu",
+        success: true,
+      });
+    } else {
+      return res.status(200).send({
+        success: true,
+        message: "Wizyta pomyślnie zarezerwowana",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      error,
+      message: "Błąd przy rezerwacji",
+    });
+  }
+};
+
+const userVisitController = async (req, res) => {
+  try {
+    const visits = await appointmentModel.find({ Iduser: req.body.Iduser });
+    res.status(200).send({
+      success: true,
+      message: "Pomyślnie wczytano wizyty użytkownika",
+      data: visits,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      error,
+      message: "Błąd w wizytyach użytkownika",
+    });
+  }
+};
+
 module.exports = {
   loginController,
   registerController,
@@ -219,4 +277,6 @@ module.exports = {
   deletenotification,
   getAllDoctorsController,
   reservationController,
+  checkReservationController,
+  userVisitController,
 };

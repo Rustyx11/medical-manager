@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
   },
   doctor: {
     type: Boolean,
-    default: false,
+    default: true,
   },
   notification: {
     type: Array,

@@ -4,6 +4,8 @@ const {
   getDoctorInfoController,
   updateProfileController,
   getDoctorByIdController,
+  doctorVisitsController,
+  updateStatusController,
 } = require("../controllers/dController");
 const router = express.Router();
 
@@ -15,5 +17,11 @@ router.post("/updateProfile", uAuthorization, updateProfileController);
 
 //POST pojedyncza informacja o doktorze
 router.post("/getDoctorById", uAuthorization, getDoctorByIdController);
+
+//GET wizyty doktora
+router.get("/doctor-visits", uAuthorization, doctorVisitsController);
+
+//POST Aktualizacja Statusu
+router.post("/update-status", uAuthorization, updateStatusController);
 
 module.exports = router;
