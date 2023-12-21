@@ -10,6 +10,10 @@ const {
   reservationController,
   checkReservationController,
   userVisitController,
+  addDocumentationController,
+  getAllDocumentationsController,
+  sendVerificationEmailController,
+  verifyEmailController,
 } = require("../controllers/uController");
 const uAuthorization = require("../middlewares/uAuthorization");
 
@@ -38,6 +42,16 @@ router.post("/delete-notification", uAuthorization, deletenotification);
 //GET Wszyscy doktorzy
 router.get("/getAllDoctors", uAuthorization, getAllDoctorsController);
 
+//GET Wszystkie Dokumnetacje
+router.get(
+  "/getAllDocumentations",
+  uAuthorization,
+  getAllDocumentationsController
+);
+
+//Dodawanie Dokumnetacji
+router.post("/add-documentation", uAuthorization, addDocumentationController);
+
 //Rezerwowanie Wizyty
 router.post("/reservation", uAuthorization, reservationController);
 
@@ -46,5 +60,15 @@ router.post("/check-reservation", uAuthorization, checkReservationController);
 
 //Lista Wizyt
 router.get("/user-visit", uAuthorization, userVisitController);
+
+//Wysyłanie Weryfikacji Email
+router.get(
+  "/verify-email",
+  uAuthorization,
+  sendVerificationEmailController
+);
+
+//Weryfikacja Email
+router.get("/verify", uAuthorization, verifyEmailController);
 
 module.exports = router;

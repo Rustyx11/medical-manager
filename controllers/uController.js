@@ -4,7 +4,69 @@ const jwt = require("jsonwebtoken");
 const userModel = require("../models/uModel");
 const doctorModel = require("../models/dModel");
 const appointmentModel = require("../models/aModel");
+const documentationModel = require("../models/docModel");
+const userVerificationModel = require("../models/uVerModel");
+const nodemailer = require("nodemailer");
+const path = require("path");
+const uuid = require("uuid");
 const moment = require("moment");
+const { default: mongoose } = require("mongoose");
+
+//Proces weryfikacji
+const sendVerificationEmailController = async (name, email, user_id) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 25,
+      secure: false,
+      requireTLS: true,
+      auth: {
+        user: 'szymonwieczorek011@gmail.com',
+        pass: 'ujvm vbtf kqvt ihqp ',
+      },
+    });
+
+    const mailOptions = {
+      from: 'szymonwieczorek011@gmail.com',
+      to: email,
+      subject: 'Verification mail',
+      html: `<p>Witaj ${name} kliknij <a href="http://localhost:3000/verify?id=${user_id}">tutaj</a> aby zweryfikować konto</p>`,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email został wysłany:", info.response);
+  } catch (error) {
+    console.log("Błąd podczas wysyłania emaila:", error);
+  }
+};
+
+
+const verifyEmailController = async (req, res) => {
+  try {
+    console.log("Próba weryfikacji, _id:", req.query.id);
+    const updateStatus = await userModel.updateOne(
+      { _id: req.query.id },
+      { $set: { verification: true } }
+    );
+
+    console.log("Wynik aktualizacji:", updateStatus);
+
+    const user = await userModel.findById(req.query.id);
+    console.log("Stan weryfikacji po aktualizacji:", user.verification);
+
+    res.redirect("/verify");
+  } catch (error) {
+    console.log("Błąd podczas weryfikacji:", error.message);
+    res.status(500).send({
+      success: false,
+      message: `Błąd podczas weryfikacji: ${error.message}`,
+    });
+  }
+};
+
+
+
+
 
 //proces rejestracji
 const registerController = async (req, res) => {
@@ -22,9 +84,10 @@ const registerController = async (req, res) => {
     req.body.password = passwordhashed;
     const nUser = new uModel(req.body);
     await nUser.save();
+    sendVerificationEmailController(req.body.name, req.body.email, nUser._id);
     res
       .status(201)
-      .send({ message: "Zarejestrowano pomyślnie", success: true });
+      .send({ message: "Zarejestrowano pomyślnie, zweryfkuje swój adres email", success: true });
   } catch (error) {
     console.log(error);
     res.status(500).send({
@@ -63,7 +126,7 @@ const loginController = async (req, res) => {
 
 const uController = async (req, res) => {
   try {
-    const user = await userModel.findById({ _id: req.body.Iduser });
+    const user = await userModel.findById(req.body._id);
     user.password = undefined;
     if (!user) {
       return res.status(200).send({
@@ -90,7 +153,11 @@ const uController = async (req, res) => {
 
 const adController = async (req, res) => {
   try {
-    const newDoctor = await doctorModel({ ...req.body, status: "pending" });
+    const newDoctor = await doctorModel({
+      ...req.body,
+      status: "pending",
+      _id: new mongoose.Types.ObjectId(),
+    });
     await newDoctor.save();
     const adminUser = await userModel.findOne({ admin: true });
     const notification = adminUser.notification;
@@ -98,7 +165,7 @@ const adController = async (req, res) => {
       type: "add-doctor-request",
       message: `${newDoctor.Name} ${newDoctor.LastName} został dodany jako doktor`,
       data: {
-        doctorID: newDoctor._id,
+        doctorID: "newDoctor._id",
         name: newDoctor.Name + " " + newDoctor.LastName,
         onClickPath: "/admin/doctors",
       },
@@ -118,11 +185,42 @@ const adController = async (req, res) => {
   }
 };
 
+//Dodawanie dokumentacji
+const addDocumentationController = async (req, res) => {
+  try {
+    const newDocumentation = await documentationModel({ ...req.body });
+    await newDocumentation.save();
+    const adminUser = await userModel.findOne({ admin: true });
+    const notification = adminUser.notification;
+    notification.push({
+      type: "add-documentation-request",
+      message: `Dokumentacja ${newDocumentation.Name} ${newDocumentation.LastName} została dodana`,
+      data: {
+        doctorID: newDocumentation._id,
+        name: newDocumentation.Name + " " + newDocumentation.LastName,
+        onClickPath: "/admin/documentation",
+      },
+    });
+    await userModel.findByIdAndUpdate(adminUser._id, { notification });
+    res.status(201).send({
+      success: true,
+      message: "Dokumentacja została dodana poprawnie",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      error,
+      message: "Błąd podczas dodawania dokumentacji",
+    });
+  }
+};
+
 //Powiadomienia
 
 const getnotification = async (req, res) => {
   try {
-    const user = await userModel.findOne({ _id: req.body.Iduser });
+    const user = await userModel.findOne({ _id: req.body._id });
     const shownotification = user.shownotification;
     const notification = user.notification;
     shownotification.push(...notification);
@@ -147,7 +245,7 @@ const getnotification = async (req, res) => {
 //Usuwanie Powiadomień
 const deletenotification = async (req, res) => {
   try {
-    const user = await userModel.findOne({ _id: req.body.Iduser });
+    const user = await userModel.findOne({ _id: req.body._id });
     user.notification = [];
     user.shownotification = [];
     const updateUser = await user.save();
@@ -185,6 +283,24 @@ const getAllDoctorsController = async (req, res) => {
   }
 };
 
+const getAllDocumentationsController = async (req, res) => {
+  try {
+    const documentations = await documentationModel.find({});
+    res.status(200).send({
+      success: true,
+      message: "Lista dokumentacji pomyślnie załadowana",
+      data: doctors,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      error,
+      message: "Błąd w pobieraniu listy dokumentacji",
+    });
+  }
+};
+
 const reservationController = async (req, res) => {
   try {
     req.body.date = moment(req.body.date, "DD-MM-YYYY").toISOString();
@@ -192,7 +308,7 @@ const reservationController = async (req, res) => {
     req.body.status = "pending";
     const newAppointment = new appointmentModel(req.body);
     await newAppointment.save();
-    const user = await userModel.findOne({ _id: req.body.doctorInfo.Iduser });
+    const user = await userModel.findOne({ _id: req.body.doctorInfo._id });
     user.notification.push({
       type: "New-reservation",
       message: `Nowe zgłoszenie rezerwacji od ${req.body.userInfo.name}`,
@@ -252,7 +368,7 @@ const checkReservationController = async (req, res) => {
 
 const userVisitController = async (req, res) => {
   try {
-    const visits = await appointmentModel.find({ Iduser: req.body.Iduser });
+    const visits = await appointmentModel.findById(req.body._id);
     res.status(200).send({
       success: true,
       message: "Pomyślnie wczytano wizyty użytkownika",
@@ -276,7 +392,11 @@ module.exports = {
   getnotification,
   deletenotification,
   getAllDoctorsController,
+  getAllDocumentationsController,
   reservationController,
   checkReservationController,
   userVisitController,
+  addDocumentationController,
+  sendVerificationEmailController,
+  verifyEmailController,
 };

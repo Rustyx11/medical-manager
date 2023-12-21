@@ -29,6 +29,11 @@ const userSchema = new mongoose.Schema({
     type: Array,
     default: [],
   },
+
+  verfication: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const userModel = mongoose.model("users", userSchema);

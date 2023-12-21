@@ -10,11 +10,12 @@ module.exports = async (req, res, next) => {
           success: false,
         });
       } else {
-        req.body.Iduser = decode.id;
+        req.body._id = decode.id;
         next();
       }
     });
   } catch (error) {
+    next();
     console.log(error);
     res.status(401).send({
       message: "Autoryzacja nie poprawna!",

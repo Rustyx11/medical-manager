@@ -4,6 +4,7 @@ const {
   getAllEmployeeController,
   getAllDoctorsController,
   changeAccountStatusController,
+  getAllDocumentationsController,
 } = require("../controllers/aController");
 
 const router = express.Router();
@@ -13,6 +14,13 @@ router.get("/getAllEmployee", uAuthorization, getAllEmployeeController);
 
 //GET dla doktora
 router.get("/getAllDoctors", uAuthorization, getAllDoctorsController);
+
+//GET dla dokumnetacji
+router.get(
+  "/getAllDocumentations",
+  uAuthorization,
+  getAllDocumentationsController
+);
 
 //POST dla Statusu konta
 router.post(

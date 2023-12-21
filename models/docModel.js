@@ -10,6 +10,11 @@ const documentationSchema = new mongoose.Schema({
     require: [true, "Płeć jest wymagana"],
   },
 
+  Pesel: {
+    type: String,
+    require: [true, "Pesel jest wymagany"],
+  },
+
   Name: {
     type: String,
     require: [true, "Imie jest wymagane"],
@@ -67,5 +72,8 @@ const documentationSchema = new mongoose.Schema({
   },
 });
 
-const documentationModel = mongoose.model("doctors", doctorSchema);
-module.exports = documentation;
+const documentationModel = mongoose.model(
+  "documentations",
+  documentationSchema
+);
+module.exports = documentationModel;

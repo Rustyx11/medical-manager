@@ -10,10 +10,12 @@ const {
 const router = express.Router();
 
 //POST Informacje o doktorze
-router.post("/getDoctorInfo", uAuthorization, getDoctorInfoController);
+//router.post("/getDoctorInfo", uAuthorization, getDoctorInfoController);
+//GET Informacje o doktorze
+router.get("/getDoctorInfo/:id", uAuthorization, getDoctorInfoController);
 
 //POST aktualizacja profilu doktora
-router.post("/updateProfile", uAuthorization, updateProfileController);
+router.patch("/updateProfile/:id", uAuthorization, updateProfileController);
 
 //POST pojedyncza informacja o doktorze
 router.post("/getDoctorById", uAuthorization, getDoctorByIdController);

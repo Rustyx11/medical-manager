@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 
 const doctorSchema = new mongoose.Schema(
   {
-    Iduser: {
-      type: String,
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
     },
     Name: {
       type: String,
