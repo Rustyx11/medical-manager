@@ -4,6 +4,7 @@ const morgan = require("morgan");
 const dotenv = require("dotenv");
 const joinDB = require("./config/db");
 const cors = require("cors");
+const rfidMiddleware = require("./middlewares/rfidMiddleware");
 //dotenv config
 dotenv.config();
 
@@ -46,6 +47,8 @@ var corsOptions = {
 };
 
 app.use(cors(corsOptions));
+// Dodaj middleware przed ścieżkami API
+app.use(rfidMiddleware);
 
 //routes
 app.use("/api/v1/user", require("./routes/uRoutes"));

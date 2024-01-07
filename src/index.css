@@ -1,0 +1,19 @@
+*{
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+/* Ładowanie */
+.spinner{
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(100, 100, 240);
+}
+
+.form-btn{
+  width: 300px !important;
+  margin-top: 30px !important;
+}

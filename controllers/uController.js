@@ -16,21 +16,26 @@ const { default: mongoose } = require("mongoose");
 const sendVerificationEmailController = async (name, email, user_id) => {
   try {
     const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
+      host: "smtp.gmail.com",
       port: 25,
       secure: false,
       requireTLS: true,
       auth: {
-        user: 'szymonwieczorek011@gmail.com',
-        pass: 'ujvm vbtf kqvt ihqp ',
+        user: "szymonwieczorek011@gmail.com",
+        pass: "ujvm vbtf kqvt ihqp ",
       },
     });
 
     const mailOptions = {
-      from: 'szymonwieczorek011@gmail.com',
+      from: "szymonwieczorek011@gmail.com",
       to: email,
-      subject: 'Verification mail',
-      html: `<p>Witaj ${name} kliknij <a href="http://localhost:3000/verify?id=${user_id}">tutaj</a> aby zweryfikować konto</p>`,
+      subject: "Verification mail",
+      html:
+        "<p>Witaj " +
+        name +
+        ' kliknij <a href="http://localhost:3000/verify/' +
+        user_id +
+        '">tutaj</a> aby zweryfikować konto</p>',
     };
 
     const info = await transporter.sendMail(mailOptions);
@@ -40,33 +45,29 @@ const sendVerificationEmailController = async (name, email, user_id) => {
   }
 };
 
-
 const verifyEmailController = async (req, res) => {
+  console.log("Cos");
+  console.log(req.params);
   try {
-    console.log("Próba weryfikacji, _id:", req.query.id);
+    console.log("Próba weryfikacji, _id:", req.params.id);
     const updateStatus = await userModel.updateOne(
-      { _id: req.query.id },
-      { $set: { verification: true } }
+      { _id: req.params.id },
+      { $set: { verification: 1 } }
     );
 
     console.log("Wynik aktualizacji:", updateStatus);
 
-    const user = await userModel.findById(req.query.id);
+    const user = await userModel.findById(req.params.id);
     console.log("Stan weryfikacji po aktualizacji:", user.verification);
 
-    res.redirect("/verify");
+    res.redirect("verify");
   } catch (error) {
-    console.log("Błąd podczas weryfikacji:", error.message);
     res.status(500).send({
       success: false,
       message: `Błąd podczas weryfikacji: ${error.message}`,
     });
   }
 };
-
-
-
-
 
 //proces rejestracji
 const registerController = async (req, res) => {
@@ -85,9 +86,10 @@ const registerController = async (req, res) => {
     const nUser = new uModel(req.body);
     await nUser.save();
     sendVerificationEmailController(req.body.name, req.body.email, nUser._id);
-    res
-      .status(201)
-      .send({ message: "Zarejestrowano pomyślnie, zweryfkuje swój adres email", success: true });
+    res.status(201).send({
+      message: "Zarejestrowano pomyślnie, zweryfkuje swój adres email",
+      success: true,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({
@@ -111,6 +113,11 @@ const loginController = async (req, res) => {
       return res
         .status(200)
         .send({ message: `Podany mail lub hasło są błędne!`, success: false });
+    }
+    if (user.verification == 0) {
+      return res
+        .status(200)
+        .send({ message: `Konto nie zostało zweryfikowane!`, success: false });
     }
     const token = jwt.sign({ id: user._id }, process.env.JWT_TOKEN, {
       expiresIn: "1d",
@@ -384,6 +391,22 @@ const userVisitController = async (req, res) => {
   }
 };
 
+//RFID
+const handleRFIDRequest = async (req, res) => {
+  try {
+    const { uid } = req.body;
+    // Tutaj możesz dodać logikę obsługi UID, np. wyszukaj odpowiednią dokumentację w bazie danych
+    console.log("Otrzymano UID z Raspberry Pi:", uid);
+    // Przykładowa odpowiedź
+    res.json({ success: true, message: "Dane obsłużone pomyślnie" });
+  } catch (error) {
+    console.error("Błąd podczas obsługi żądania RFID:", error);
+    res
+      .status(500)
+      .send({ success: false, message: "Błąd podczas obsługi żądania RFID" });
+  }
+};
+
 module.exports = {
   loginController,
   registerController,
@@ -399,4 +422,5 @@ module.exports = {
   addDocumentationController,
   sendVerificationEmailController,
   verifyEmailController,
+  handleRFIDRequest,
 };

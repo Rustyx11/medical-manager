@@ -30,9 +30,9 @@ const userSchema = new mongoose.Schema({
     default: [],
   },
 
-  verfication: {
-    type: Boolean,
-    default: false,
+  verification: {
+    type: Number,
+    default: 0,
   },
 });
 
