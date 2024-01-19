@@ -22,7 +22,7 @@ const documentationModel = require("../models/docModel");
 const getDocumentationInfoController = async (req, res) => {
   const { id } = req.params;
 
-  const ApprenticeshipsDates = await documentationModel.findById(id);
+  const ApprenticeshipsDates = await documentationModel.findOne({chip:id});
 
   if (!ApprenticeshipsDates) {
     return res.status(404).json({ error: "No such workout" });

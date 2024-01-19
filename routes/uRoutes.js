@@ -15,6 +15,7 @@ const {
   sendVerificationEmailController,
   verifyEmailController,
   handleRFIDRequest,
+  getRfidController,
 } = require("../controllers/uController");
 const uAuthorization = require("../middlewares/uAuthorization");
 
@@ -62,19 +63,15 @@ router.post("/check-reservation", uAuthorization, checkReservationController);
 //Lista Wizyt
 router.get("/user-visit", uAuthorization, userVisitController);
 
+
 //Weryfikacja Email
 router.get("/verify/:id", verifyEmailController);
 
-// Przykładowa ścieżka w aplikacji
-{
-  /*router.post('/api/rfid', (req, res) => {
-  const { uid } = req.body;
-  // Tutaj możesz dodać logikę obsługi UID
-  console.log('Otrzymano UID z Raspberry Pi:', uid);
-  res.json({ success: true });
-});*/
-}
-
+// Dodaj obsługę żądania RFID
 router.post("/rfid", handleRFIDRequest);
+
+router.get("/getrfid", getRfidController);
+
+
 
 module.exports = router;

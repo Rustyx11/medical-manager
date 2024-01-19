@@ -70,6 +70,10 @@ const documentationSchema = new mongoose.Schema({
     type: Boolean,
     require: [true, "Podaj czy pacjent bierze narkotyki"],
   },
+  chip: {
+    type: Number,
+    require: [true, "Przybliż kartę do czytnika, by przypisać ją do dokumentacji."],
+  },
 });
 
 const documentationModel = mongoose.model(

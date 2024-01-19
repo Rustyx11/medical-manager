@@ -37,6 +37,7 @@ const doctorSchema = new mongoose.Schema(
       type: Object,
       require: [true, "Czas pracy lekarza."],
     },
+
   },
   { timestamps: true }
 );

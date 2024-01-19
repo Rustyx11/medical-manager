@@ -5,10 +5,7 @@ const userModel = require("../models/uModel");
 const doctorModel = require("../models/dModel");
 const appointmentModel = require("../models/aModel");
 const documentationModel = require("../models/docModel");
-const userVerificationModel = require("../models/uVerModel");
 const nodemailer = require("nodemailer");
-const path = require("path");
-const uuid = require("uuid");
 const moment = require("moment");
 const { default: mongoose } = require("mongoose");
 
@@ -17,7 +14,7 @@ const sendVerificationEmailController = async (name, email, user_id) => {
   try {
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
-      port: 25,
+      port: 587,
       secure: false,
       requireTLS: true,
       auth: {
@@ -69,6 +66,10 @@ const verifyEmailController = async (req, res) => {
   }
 };
 
+
+
+
+
 //proces rejestracji
 const registerController = async (req, res) => {
   try {
@@ -86,10 +87,9 @@ const registerController = async (req, res) => {
     const nUser = new uModel(req.body);
     await nUser.save();
     sendVerificationEmailController(req.body.name, req.body.email, nUser._id);
-    res.status(201).send({
-      message: "Zarejestrowano pomyślnie, zweryfkuje swój adres email",
-      success: true,
-    });
+    res
+      .status(201)
+      .send({ message: "Zarejestrowano pomyślnie, zweryfkuje swój adres email", success: true });
   } catch (error) {
     console.log(error);
     res.status(500).send({
@@ -395,17 +395,27 @@ const userVisitController = async (req, res) => {
 const handleRFIDRequest = async (req, res) => {
   try {
     const { uid } = req.body;
-    // Tutaj możesz dodać logikę obsługi UID, np. wyszukaj odpowiednią dokumentację w bazie danych
-    console.log("Otrzymano UID z Raspberry Pi:", uid);
-    // Przykładowa odpowiedź
-    res.json({ success: true, message: "Dane obsłużone pomyślnie" });
+    const rfid = await uModel.findById('65a1659aaae6cbd0c7e601f7');
+    console.log('Otrzymano UID z Raspberry Pi:', uid);
+    rfid.RFID = uid;
+    rfid.save();
+    res.json({ success: true, message: 'Dane obsłużone pomyślnie' });
   } catch (error) {
-    console.error("Błąd podczas obsługi żądania RFID:", error);
-    res
-      .status(500)
-      .send({ success: false, message: "Błąd podczas obsługi żądania RFID" });
+    console.error('Błąd podczas obsługi żądania RFID:', error);
+    res.status(500).send({ success: false, message: 'Błąd podczas obsługi żądania RFID' });
   }
 };
+
+const getRfidController = async (req, res) => {
+  try {
+    const rfid = await uModel.findById('65a1659aaae6cbd0c7e601f7');
+    res.json({ success: true, rfid: rfid.RFID });
+  } catch (error) {
+    console.error('Błąd podczas obsługi żądania RFID:', error);
+    res.status(500).send({ success: false, message: 'Błąd podczas obsługi żądania RFID' });
+  }
+};
+
 
 module.exports = {
   loginController,
@@ -423,4 +433,5 @@ module.exports = {
   sendVerificationEmailController,
   verifyEmailController,
   handleRFIDRequest,
+  getRfidController,
 };

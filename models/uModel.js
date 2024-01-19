@@ -34,6 +34,10 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+
+  RFID :{
+    type: String,
+  }
 });
 
 const userModel = mongoose.model("users", userSchema);
